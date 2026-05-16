@@ -8,8 +8,17 @@
 
     // ——— MOBILE MENU ———
     function toggleMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('open');
+      document.body.classList.toggle('menu-open', menu.classList.contains('open'));
     }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        document.getElementById('mobileMenu').classList.remove('open');
+        document.body.classList.remove('menu-open');
+      }
+    });
 
     // ——— HERO SLIDER ———
     let currentSlide = 0;
