@@ -1,5 +1,4 @@
 
-
     // ——— NAVBAR SCROLL ———
     window.addEventListener('scroll', () => {
       const nav = document.getElementById('navbar');
@@ -121,20 +120,73 @@
     }
 
     // ——— FORM SUBMIT ———
-    function submitForm(e) {
-      e.preventDefault();
-      document.getElementById('formContent').style.display = 'none';
-      document.getElementById('formSuccess').classList.add('show');
-      setTimeout(() => {
-        document.getElementById('formContent').style.display = 'block';
-        document.getElementById('formSuccess').classList.remove('show');
-        e.target.reset();
-      }, 6000);
+    function withTimeout(promise, timeoutMs) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timed out. Please check your internet connection and Firestore rules.')), timeoutMs);
+        })
+      ]);
     }
+
+    // async function submitForm(e) {
+    //   e.preventDefault();
+
+    //   const form = e.target;
+    //   const submitButton = form.querySelector('.form-submit');
+    //   const formData = new FormData(form);
+
+    //   const enquiryData = {
+    //     parentName: formData.get('parentName').trim(),
+    //     childGrade: formData.get('childGrade'),
+    //     phone: formData.get('phone').trim(),
+    //     email: formData.get('email').trim(),
+    //     message: formData.get('message').trim(),
+    //     createdAt: new Date()
+    //   };
+
+    //   submitButton.disabled = true;
+    //   submitButton.textContent = 'Sending...';
+
+    //   try {
+    //     await withTimeout(addDoc(collection(db, 'admissionEnquiries'), enquiryData), 12000);
+
+    //     document.getElementById('formContent').style.display = 'none';
+    //     document.getElementById('formSuccess').classList.add('show');
+    //     setTimeout(() => {
+    //       document.getElementById('formContent').style.display = 'block';
+    //       document.getElementById('formSuccess').classList.remove('show');
+    //       form.reset();
+    //     }, 6000);
+    //   } catch (error) {
+    //     console.error('Error saving enquiry:', error);
+    //     const message = error?.message || 'Unknown Firebase error';
+    //     console.error(`Sorry, your enquiry could not be sent.\n\n${message}`);
+    //   } finally {
+    //     submitButton.disabled = false;
+    //     submitButton.textContent = 'Send Enquiry →';
+    //   }
+    // }
 
     // ——— STAGGERED CARD ANIMATIONS ———
     document.querySelectorAll('.activity-card, .symbol-card, .timeline-item').forEach((el, i) => {
       el.style.transitionDelay = `${i * 0.08}s`;
       observer.observe(el);
     });
+
+    window.toggleMenu = toggleMenu;
+    window.goToSlide = goToSlide;
+    window.openSymbol = openSymbol;
+    window.closeSymbol = closeSymbol;
+    window.showTab = showTab;
+    window.filterGallery = filterGallery;
+    // window.submitForm = submitForm;
+
+   
+//     emailjs.init(" H02ZHbd7y_UVbV2Iv");
+//     emailjs.send(
+//   "service_jjf7lks",
+//   "template_xumipbg",
+//   enquiryData
+// );
  

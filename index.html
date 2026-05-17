@@ -875,9 +875,9 @@
               <form onsubmit="submitForm(event)">
                 <div class="form-row">
                   <div class="form-group"><label>Parent's Name *</label><input type="text" placeholder="Your full name"
-                      required></div>
+                      name="parentName" required></div>
                   <div class="form-group"><label>Child's Grade *</label>
-                    <select required>
+                    <select name="childGrade" required>
                       <option value="">Select Grade</option>
                       <option>KG / LKG / UKG</option>
                       <option>Grade 1</option>
@@ -897,21 +897,25 @@
                 </div>
                 <div class="form-row">
                   <div class="form-group"><label>Phone Number *</label><input type="tel" placeholder="+91 XXXXX XXXXX"
-                      required></div>
-                  <div class="form-group"><label>Email Address</label><input type="email" placeholder="your@email.com">
+                      name="phone" required></div>
+                  <div class="form-group"><label>Email Address</label><input type="email" placeholder="your@email.com" name="email">
                   </div>
                 </div>
                 <div class="form-group"><label>Message</label><textarea
-                    placeholder="Tell us about your child, any specific questions, or preferred visit date..."></textarea>
+                    placeholder="Tell us about your child, any specific questions, or preferred visit date..." name="message"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary form-submit">Send Enquiry →</button>
               </form>
             </div>
-            <div class="form-success" id="formSuccess">
-              <span class="success-icon">✅</span>
+            <div class="form-success" id="formSuccess" role="status" aria-live="polite">
+              <span class="success-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M9.2 16.6 4.9 12.3l1.4-1.4 2.9 2.9 8.5-8.5 1.4 1.4-9.9 9.9Z"></path>
+                </svg>
+              </span>
               <div class="success-title">Thank You!</div>
-              <p class="success-msg">Your enquiry has been received. Our admissions team will contact you within 24
-                hours.<br><br>We look forward to welcoming your child to the DNU S.M.B.M family! 🎓</p>
+              <p class="success-msg">Your enquiry has been received. Our admissions team will contact you within 24 hours.</p>
+              <p class="success-msg success-family">We look forward to welcoming your child to the DNU S.M.B.M family! 🎓</p>
             </div>
           </div>
         </div>
@@ -991,7 +995,113 @@
     <a href="tel:6384446708" class="s-call">📞 Call Us</a>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js">
+  </script>
+  <script type="module">
+    // Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDY_3ZFQOkpBbD8TQEVl0gba6WpMAsTG1Y",
+  authDomain: "smbm-national-public-school.firebaseapp.com",
+  projectId: "smbm-national-public-school",
+  storageBucket: "smbm-national-public-school.firebasestorage.app",
+  messagingSenderId: "484446092106",
+  appId: "1:484446092106:web:aa08885d7f80a3f3d05fb3",
+  measurementId: "G-VK89KN06JV"
+};
+
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Firestore initialize
+const db = getFirestore(app);
+
+let successCardTimer;
+
+function showSuccessCard(form) {
+  const formContent = document.getElementById("formContent");
+  const formSuccess = document.getElementById("formSuccess");
+  if (!formContent || !formSuccess) return;
+
+  clearTimeout(successCardTimer);
+  form.reset();
+  formContent.style.display = "none";
+  formSuccess.classList.remove("show");
+  void formSuccess.offsetWidth;
+  formSuccess.classList.add("show");
+
+  successCardTimer = setTimeout(() => {
+    formSuccess.classList.remove("show");
+    setTimeout(() => {
+      formContent.style.display = "block";
+    }, 260);
+  }, 6000);
+}
+
+
+// FORM SUBMIT
+window.submitForm = async function(e) {
+
+  e.preventDefault();
+
+  const form = e.target;
+  const formContent = document.getElementById("formContent");
+  const formSuccess = document.getElementById("formSuccess");
+  clearTimeout(successCardTimer);
+  formSuccess?.classList.remove("show");
+  if (formContent) formContent.style.display = "block";
+
+  const enquiryData = {
+    parentName: form.parentName.value,
+    childGrade: form.childGrade.value,
+    phone: form.phone.value,
+    email: form.email.value,
+    message: form.message.value,
+    createdAt: new Date()
+  };
+
+  try {
+
+    // Firestore save
+    await addDoc(
+      collection(db, "admissionEnquiries"),
+      enquiryData
+    );
+
+    // EmailJS init
+    emailjs.init("H02ZHbd7y_UVbV2Iv");
+
+    // Send email
+    await emailjs.send(
+      "service_jjf7lks",
+      "template_xumipbg",
+      enquiryData
+    );
+
+    showSuccessCard(form);
+
+  } catch(error) {
+
+    console.error(error);
+
+    console.error(error.message || "Something went wrong. Please try again.");
+
+  }
+
+}
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </body>
 
 </html>
